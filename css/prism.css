@@ -1,9 +1,12 @@
+/* Example: All "purple" or cyan/indigo-based tokens changed to yellow tones */
+
 .token.tag,
 .token.class-name,
 .token.selector,
 .token.selector .class,
 .token.function {
-  @apply text-fuchsia-500;
+  /* was text-fuchsia-500 */
+  @apply text-yellow-500;
 }
 
 .token.attr-name,
@@ -12,7 +15,8 @@
 .token.operator,
 .token.pseudo-class,
 .token.important {
-  @apply text-cyan-500;
+  /* was text-cyan-500 */
+  @apply text-yellow-400;
 }
 
 .token.attr-value,
@@ -21,13 +25,16 @@
 .token.number,
 .token.unit,
 .token.color {
-  @apply text-indigo-600;
+  /* was text-indigo-600 */
+  @apply text-yellow-600;
 }
 
 .token.module {
-  @apply text-cyan-400;
+  /* was text-cyan-400 */
+  @apply text-yellow-300;
 }
 
+/* Keeping these as-is, unless you want them changed too: */
 .token.punctuation,
 .token.property {
   @apply text-slate-500;
