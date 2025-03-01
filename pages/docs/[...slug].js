@@ -17,18 +17,10 @@ export default function Blog(props) {
   const { postdata, siteconfig, sidebar, preview } = props;
   const router = useRouter();
 
-  // If "postdata" or "siteconfig" is missing, show a 404. We won't do a loading screen.
-  if (!postdata || !siteconfig) {
-    return <ErrorPage statusCode={404} />;
-  }
+  // Derive the slug from the last part of /docs/... path
+  const activeSlug = router.query.slug?.slice(-1).pop();
 
-  // Next.js won't show a fallback page because we use fallback: 'blocking' below,
-  // so we don't need a "router.isFallback" check.
-
-  const { slug } = router.query;
-  const activeSlug = slug?.slice(-1).pop();
-
-  // Live preview logic
+  // 1) Call Hooks UNCONDITIONALLY, so they run in the same order every time
   const { data: post } = usePreviewSubscription(singlequery, {
     params: { slug: activeSlug },
     initialData: postdata,
@@ -40,16 +32,21 @@ export default function Blog(props) {
     enabled: preview || router.query.preview !== undefined
   });
 
-  // Outline for table of contents
-  const outline = post && parseOutline(post.body);
+  // 2) If data is missing, THEN show 404 or handle error, but do it AFTER the hooks
+  if (!post || !siteConfig) {
+    return <ErrorPage statusCode={404} />;
+  }
 
-  // Build a flat array of all docs from the sidebar
-  const docslist = sidebar?.map(a => a.items).flat();
-  const currentPage = docslist?.findIndex(
+  // Outline for table of contents
+  const outline = parseOutline(post.body);
+
+  // Flatten the sidebar docs to find previous/next
+  const docslist = sidebar?.map(a => a.items).flat() || [];
+  const currentPage = docslist.findIndex(
     a => a.slug.current === activeSlug
   );
-  const prevPost = docslist?.[currentPage - 1];
-  const nextPost = docslist?.[currentPage + 1];
+  const prevPost = docslist[currentPage - 1];
+  const nextPost = docslist[currentPage + 1];
 
   return (
     <Layout
@@ -91,9 +88,7 @@ export default function Blog(props) {
                 href={`/docs/${nextPost?.category.slug.current}/${nextPost?.slug.current}`}
               >
                 <a className="flex flex-col items-end">
-                  <span className="text-sm text-slate-400">
-                    Next
-                  </span>
+                  <span className="text-sm text-slate-400">Next</span>
                   <span className="text-violet-500">
                     {nextPost.title}
                   </span>
@@ -108,18 +103,17 @@ export default function Blog(props) {
 }
 
 export async function getStaticProps({ params, preview = false }) {
-  // Use the last part of the slug array as the doc slug
   const docSlug = params.slug.slice(-1).pop();
 
-  // Fetch the single doc
+  // Query the doc
   const post = await getClient(preview).fetch(singlequery, {
-    slug: docSlug
+    slug: docSlug,
   });
 
-  // Fetch sidebar categories/docs
+  // Query the sidebar categories
   const sidebar = await getClient(preview).fetch(catquery);
 
-  // Fetch site config
+  // Query site config
   const config = await getClient(preview).fetch(configQuery);
 
   return {
@@ -127,17 +121,15 @@ export async function getStaticProps({ params, preview = false }) {
       postdata: post || null,
       siteconfig: config || null,
       sidebar: sidebar || [],
-      preview
+      preview,
     },
-    revalidate: 10
+    revalidate: 10,
   };
 }
 
 export async function getStaticPaths() {
-  // We provide no paths upfront, letting Next.js generate them on demand
-  // but we do NOT show a fallback or loading screen.
   return {
     paths: [],
-    fallback: "blocking" // Blocks rendering until data is loaded
+    fallback: "blocking",
   };
 }
