@@ -32,7 +32,7 @@ export default function Blog(props) {
     enabled: preview || router.query.preview !== undefined
   });
 
-  // 2) If data is missing, THEN show 404 or handle error, but do it AFTER the hooks
+  // 2) If data is missing, THEN show 404 or handle error
   if (!post || !siteConfig) {
     return <ErrorPage statusCode={404} />;
   }
@@ -60,7 +60,8 @@ export default function Blog(props) {
           {post.title}
         </h1>
 
-        <div className="mt-4 prose prose-violet prose-a:text-violet-500 max-w-none prose-pre:bg-slate-100 prose-pre:text-slate-700 prose-headings:scroll-m-20">
+        {/* CHANGED from 'prose-violet' & 'prose-a:text-violet-500' to 'prose-yellow' & 'prose-a:text-yellow-500' */}
+        <div className="mt-4 prose prose-yellow prose-a:text-yellow-500 max-w-none prose-pre:bg-slate-100 prose-pre:text-slate-700 prose-headings:scroll-m-20">
           {post.body && <PortableText value={post.body} />}
         </div>
 
@@ -74,7 +75,8 @@ export default function Blog(props) {
                   <span className="text-sm text-slate-400">
                     Previous
                   </span>
-                  <span className="text-violet-500">
+                  {/* CHANGED from text-violet-500 -> text-yellow-500 */}
+                  <span className="text-yellow-500">
                     {prevPost.title}
                   </span>
                 </a>
@@ -89,7 +91,8 @@ export default function Blog(props) {
               >
                 <a className="flex flex-col items-end">
                   <span className="text-sm text-slate-400">Next</span>
-                  <span className="text-violet-500">
+                  {/* CHANGED from text-violet-500 -> text-yellow-500 */}
+                  <span className="text-yellow-500">
                     {nextPost.title}
                   </span>
                 </a>
@@ -105,15 +108,11 @@ export default function Blog(props) {
 export async function getStaticProps({ params, preview = false }) {
   const docSlug = params.slug.slice(-1).pop();
 
-  // Query the doc
   const post = await getClient(preview).fetch(singlequery, {
     slug: docSlug,
   });
 
-  // Query the sidebar categories
   const sidebar = await getClient(preview).fetch(catquery);
-
-  // Query site config
   const config = await getClient(preview).fetch(configQuery);
 
   return {
