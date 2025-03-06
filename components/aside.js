@@ -28,7 +28,7 @@ const TableOfContents = props => (
     {props.outline.map(heading => (
       <li key={heading._key}>
         <a
-          className="inline-flex py-1 text-slate-600 hover:text-violet-500 focus:text-violet-500"
+          className="inline-flex py-1 text-yellow-500 hover:text-yellow-600 focus:text-yellow-500"
           href={"#" + heading.slug}>
           {getChildrenText(heading)}
         </a>
